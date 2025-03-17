@@ -1,0 +1,221 @@
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+struct Producto {
+    int id;
+    char nombre[40];
+    struct Producto* siguiente;
+};
+
+// Punteros globales para la lista
+struct Producto *cabeza, *nodoActual, *nuevoNodo;
+
+// Función para agregar un nuevo producto
+void Agregar() {
+    int id;
+    cout << "\nIngrese el ID del producto: ";
+    cin >> id;
+
+    // Verificar si el ID ya existe
+    nodoActual = cabeza;
+    while (nodoActual != NULL) {
+        if (nodoActual->id == id) {
+            cout << "\nEl ID ingresado ya está registrado.\n";
+            return;
+        }
+        nodoActual = nodoActual->siguiente;
+    }
+
+    // Crear un nuevo nodo
+    nuevoNodo = (struct Producto*) malloc(sizeof(Producto));
+    if (nuevoNodo == NULL) {
+        cout << "\nError: No se pudo asignar memoria.\n";
+        return;
+    }
+
+    nuevoNodo->id = id;
+    cout << "\nIngrese el nombre del producto: ";
+    cin.ignore(); // Limpiar el búfer
+    cin.getline(nuevoNodo->nombre, 40);
+    nuevoNodo->siguiente = NULL;
+
+    // Insertar en la lista
+    if (cabeza == NULL) {
+        cabeza = nuevoNodo;
+    } else {
+        nodoActual = cabeza;
+        while (nodoActual->siguiente != NULL) {
+            nodoActual = nodoActual->siguiente;
+        }
+        nodoActual->siguiente = nuevoNodo;
+    }
+
+    cout << "\nProducto agregado correctamente.\n";
+}
+
+// Función para mostrar todos los productos
+void Mostrar() {
+    if (cabeza == NULL) {
+        cout << "\nLa lista de productos está vacía.\n";
+        return;
+    }
+
+    cout << "\nLista de productos:\n";
+    for (nodoActual = cabeza; nodoActual != NULL; nodoActual = nodoActual->siguiente) {
+        cout << "ID: " << nodoActual->id << "\n";
+        cout << "Nombre: " << nodoActual->nombre << "\n";
+        cout << "------------------------\n";
+    }
+}
+
+// Función para buscar un producto por ID
+void Buscar() {
+    if (cabeza == NULL) {
+        cout << "\nNo hay productos registrados para buscar.\n";
+        return;
+    }
+
+    int idBuscar;
+    cout << "\nIngrese el ID del producto que desea buscar: ";
+    cin >> idBuscar;
+
+    nodoActual = cabeza;
+    bool encontrado = false;
+
+    while (nodoActual != NULL) {
+        if (nodoActual->id == idBuscar) {
+            cout << "\nProducto encontrado:\n";
+            cout << "ID: " << nodoActual->id << "\n";
+            cout << "Nombre: " << nodoActual->nombre << "\n";
+            encontrado = true;
+            break;
+        }
+        nodoActual = nodoActual->siguiente;
+    }
+
+    if (!encontrado) {
+        cout << "\nNo se ha encontrado un producto con ese ID.\n";
+    }
+}
+
+// Función para eliminar un producto por ID
+void Eliminar() {
+    if (cabeza == NULL) {
+        cout << "\nNo hay productos registrados para eliminar.\n";
+        return;
+    }
+
+    int idEliminar;
+    cout << "\nIngrese el ID del producto a eliminar: ";
+    cin >> idEliminar;
+
+    struct Producto *nodoAEliminar = cabeza, *nodoAnterior = NULL;
+
+    while (nodoAEliminar != NULL) {
+        if (nodoAEliminar->id == idEliminar) {
+            if (nodoAnterior == NULL) {
+                cabeza = nodoAEliminar->siguiente;
+            } else {
+                nodoAnterior->siguiente = nodoAEliminar->siguiente;
+            }
+            free(nodoAEliminar);
+            cout << "\nProducto eliminado correctamente.\n";
+            return;
+        }
+        nodoAnterior = nodoAEliminar;
+        nodoAEliminar = nodoAEliminar->siguiente;
+    }
+
+    cout << "\nNo se encontró un producto con el ID proporcionado.\n";
+}
+
+// Función para contar el número de productos
+void Contar() {
+    int contador = 0;
+    for (nodoActual = cabeza; nodoActual != NULL; nodoActual = nodoActual->siguiente) {
+        contador++;
+    }
+
+    if (contador == 0) {
+        cout << "\nNo hay productos registrados.\n";
+    } else {
+        cout << "\nEl número total de productos es: " << contador << "\n";
+    }
+}
+
+// Función para modificar un producto por ID
+void Modificar() {
+    if (cabeza == NULL) {
+        cout << "\nNo hay productos registrados para modificar.\n";
+        return;
+    }
+
+    int idModificar;
+    cout << "\nIngrese el ID del producto que desea modificar: ";
+    cin >> idModificar;
+
+    nodoActual = cabeza;
+    while (nodoActual != NULL) {
+        if (nodoActual->id == idModificar) {
+            cout << "\nProducto encontrado.\n";
+            cout << "ID: " << nodoActual->id << "\n";
+            cout << "Nombre actual: " << nodoActual->nombre << "\n";
+
+            cout << "\nIngrese el nuevo nombre del producto: ";
+            cin.ignore(); // Limpiar el búfer
+            cin.getline(nodoActual->nombre, 40);
+
+            cout << "\nProducto modificado correctamente.\n";
+            return;
+        }
+        nodoActual = nodoActual->siguiente;
+    }
+
+    cout << "\nNo se encontró un producto con el ID proporcionado.\n";
+}
+
+int main() {
+    int opcion;
+
+    do {
+        cout << "\n----- MENÚ -----\n";
+        cout << "1. Agregar producto\n";
+        cout << "2. Mostrar productos\n";
+        cout << "3. Buscar producto\n";
+        cout << "4. Eliminar producto\n";
+        cout << "5. Contar productos\n";
+        cout << "6. Modificar producto\n";
+        cout << "7. Salir\n";
+        cout << "Seleccione una opción: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                Agregar();
+                break;
+            case 2:
+                Mostrar();
+                break;
+            case 3:
+                Buscar();
+                break;
+            case 4:
+                Eliminar();
+                break;
+            case 5:
+                Contar();
+                break;
+            case 6:
+                Modificar();
+                break;
+            case 7:
+                cout << "\nSaliendo del programa...\n";
+                break;
+            default:
+                cout << "\nOpción no válida. Inténtelo de nuevo.\n";
+        }
+    } while (opcion != 7);
+
+    return 0;
+}
