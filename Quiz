@@ -1,0 +1,114 @@
+#include <iostream> #include <malloc.h>
+
+using namespace std;
+
+// Definición de la estructura Cliente que almacena la información de cada cliente struct Cliente { int id; // Identificador único del cliente char nombre[40]; // Nombre del cliente int edad; // Edad del cliente char genero; // Género del cliente ('M' o 'F') char motivo[50]; // Motivo de la visita struct Cliente* siguiente; // Puntero al siguiente cliente en la lista };
+
+// Declaración de punteros para manejar la lista de clientes y el historial struct Cliente *listaClientes = NULL, *clienteBusqueda = NULL, *clienteNuevo = NULL, *historialClientes = NULL, *ultimoAtendido = NULL;
+
+// Contadores de clientes por género int hombres = 0, mujeres = 0, diferenciaGenero = 0;
+
+// Función para agregar un nuevo cliente a la lista de espera void AgregarCliente() { int id, edad; char genero, continuar;
+
+do {
+    cout << "¿Es mayor de edad? (s/n): ";
+    cin >> continuar;
+
+    if (continuar == 's' || continuar == 'S') {
+        cout << "Digite su edad: ";
+        cin >> edad;
+
+        if (edad >= 18) {
+            cout << "Ingrese el ID: ";
+            cin >> id;
+            
+            // Verifica si el ID ya existe en la lista
+            clienteBusqueda = listaClientes;
+            while (clienteBusqueda != NULL) {
+                if (clienteBusqueda->id == id) {
+                    cout << "ID repetido.\n";
+                    return;
+                }
+                clienteBusqueda = clienteBusqueda->siguiente;
+            }
+
+            cout << "Digite su género (M/F): ";
+            cin >> genero;
+
+            // Verifica la diferencia de género para restricciones
+            diferenciaGenero = hombres - mujeres;
+            if ((genero == 'F' || genero == 'f') && (diferenciaGenero >= 4 || mujeres >= 4)) {
+                cout << "No se permiten más mujeres\n";
+                return;
+            } else if ((genero == 'M' || genero == 'm') && (diferenciaGenero <= -4 || hombres >= 4)) {
+                cout << "No se permiten más hombres\n";
+                return;
+            }
+
+            // Creación y asignación de memoria para el nuevo cliente
+            clienteNuevo = (struct Cliente *) malloc(sizeof(struct Cliente));
+            clienteNuevo->id = id;
+            clienteNuevo->edad = edad;
+            clienteNuevo->genero = genero;
+
+            // Contador de género
+            if (genero == 'F' || genero == 'f') mujeres++;
+            else hombres++;
+
+            cout << "Ingrese el nombre: ";
+            cin.ignore();
+            cin.getline(clienteNuevo->nombre, 40);
+
+            cout << "Digite su motivo por el cual llega: ";
+            cin.getline(clienteNuevo->motivo, 50);
+
+            clienteNuevo->siguiente = NULL;
+
+            // Agrega el cliente a la lista de espera
+            if (listaClientes == NULL) {
+                listaClientes = clienteNuevo;
+            } else {
+                clienteBusqueda = listaClientes;
+                while (clienteBusqueda->siguiente != NULL) {
+                    clienteBusqueda = clienteBusqueda->siguiente;
+                }
+                clienteBusqueda->siguiente = clienteNuevo;
+            }
+
+            cout << "\nCliente agregado correctamente.\n";
+            cout << "¿Desea agregar otro? (s/n): ";
+            cin >> continuar;
+        } else {
+            cout << "Edad inválida.\n";
+        }
+    } else {
+        cout << "Rechazado por edad.\n";
+    }
+} while (continuar == 's' || continuar == 'S');
+
+}
+
+// Función para mostrar la lista de clientes en espera void MostrarClientes() { if (listaClientes == NULL) { cout << "\nNo hay clientes en la lista.\n"; return; }
+
+cout << "\n** Lista de Clientes **\n";
+clienteBusqueda = listaClientes;
+while (clienteBusqueda != NULL) {
+    cout << "\nID: " << clienteBusqueda->id 
+         << "\nNombre: " << clienteBusqueda->nombre 
+         << "\nEdad: " << clienteBusqueda->edad 
+         << "\nGénero: " << clienteBusqueda->genero 
+         << "\nMotivo: " << clienteBusqueda->motivo << "\n";
+    clienteBusqueda = clienteBusqueda->siguiente;
+}
+
+}
+
+// Función para contar el número de clientes en espera void ContarClientes(){ int contadorClientes = 0; clienteBusqueda = listaClientes; while(clienteBusqueda != NULL) { contadorClientes++; clienteBusqueda = clienteBusqueda->siguiente; } cout << "\nTotal de clientes en espera: " << contadorClientes << "\n"; }
+
+// Función para atender al primer cliente en la lista void AtenderCliente() { if (listaClientes == NULL) { cout << "\nNo hay clientes para atender.\n"; return; } ultimoAtendido = listaClientes; listaClientes = listaClientes->siguiente; ultimoAtendido->siguiente = historialClientes; historialClientes = ultimoAtendido; if (ultimoAtendido->genero == 'F' || ultimoAtendido->genero == 'f') mujeres--; else hombres--; cout << "\nCliente atendido:\nID: " << ultimoAtendido->id << "\nNombre: " << ultimoAtendido->nombre << "\n"; }
+
+// Función para deshacer la última atención void DeshacerAtencion() { if (ultimoAtendido == NULL) { cout << "\nNo hay atenciones para deshacer.\n"; return; } ultimoAtendido->siguiente = listaClientes; listaClientes = ultimoAtendido; if (ultimoAtendido->genero == 'F' || ultimoAtendido->genero == 'f') mujeres++; else hombres++; cout << "\nÚltima atención deshecha.\n"; ultimoAtendido = NULL; }
+
+// Función para mostrar el historial de clientes atendidos void Historial_Cliente() { if (historialClientes == NULL) { cout << "\nNo hay clientes atendidos.\n"; return; } cout << "\n** Historial de Clientes Atendidos **\n"; clienteBusqueda = historialClientes; while (clienteBusqueda != NULL) { cout << "\nID: " << clienteBusqueda->id << "\nNombre: " << clienteBusqueda->nombre << "\n"; clienteBusqueda = clienteBusqueda->siguiente; } }
+
+// Función principal con menú de opciones int main() { int opcion; do { cout << "\nSeleccione una opción:\n1. Agregar Cliente\n2. Mostrar Clientes\n3. Contar Clientes\n4. Atender Cliente\n5. Deshacer Última Atención\n6. Mostrar Historial de Clientes\n7. Salir\nOpción: "; cin >> opcion; switch (opcion) { case 1: AgregarCliente(); break; case 2: MostrarClientes(); break; case 3: ContarClientes(); break; case 4: AtenderCliente(); break; case 5: DeshacerAtencion(); break; case 6: Historial_Cliente(); break; case 7: cout << "\nSaliendo...\n"; break; default: cout << "\nOpción no válida.\n"; break; } } while (opcion != 7); return 0; }
