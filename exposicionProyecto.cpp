@@ -1,5 +1,5 @@
-// Edwin Leonel Baltan 
-// Fauyi Andrei Ortega 
+// Edwin Leonel Baltan
+// Fauyi Andrei Ortega
 // Jeison Castillo
 
 #include <iostream>
@@ -17,6 +17,12 @@ struct nodo {
 };
 
 nodo *raiz = NULL, *aux = NULL, *aux2 = NULL;
+
+// Contar nodos en el árbol
+int contarNodos(nodo* r) {
+    if (r == NULL) return 0;
+    return 1 + contarNodos(r->izq) + contarNodos(r->der);
+}
 
 // Crear nuevo nodo
 nodo* createNode(int val, const char* nombre, const char* genero, double recaudado) {
@@ -223,18 +229,32 @@ void liberar(nodo* r) {
     free(r);
 }
 
-// Rebalancear el árbol sin vector
+// Rebalancear el árbol
 void rebalancear() {
-    if (raiz == NULL) return;
+    if (raiz == NULL) {
+        cout << "El arbol esta vacio.\n";
+        return;
+    }
 
-    int total = 100; // Tamaño máximo estimado (puedes ajustarlo)
+    // Contar nodos para asignar el tamaño exacto del arreglo
+    int total = contarNodos(raiz);
     nodo** arreglo = (nodo**)malloc(sizeof(nodo*) * total);
+    if (arreglo == NULL) {
+        cout << "Error: No se pudo asignar memoria para el arreglo.\n";
+        return;
+    }
+
+    // Almacenar nodos en el arreglo
     int index = 0;
     almacenarEnArreglo(raiz, arreglo, index);
 
-    liberar(raiz); // Libera la raíz vieja (se reconstruirá)
+    // Liberar el árbol viejo
+    liberar(raiz);
+
+    // Construir árbol balanceado
     raiz = construirBalanceado(arreglo, 0, index - 1);
 
+    // Liberar el arreglo
     free(arreglo);
     cout << "Arbol reestructurado correctamente.\n";
 }
